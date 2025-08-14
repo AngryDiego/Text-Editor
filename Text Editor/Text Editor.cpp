@@ -3,6 +3,7 @@
 #include <vector>
 #include <stack>
 #include <fstream>
+#define stopCase break
 
 class Document {
     std::string documentName;
@@ -32,8 +33,9 @@ public :
 
     void LoadFromFile (std::string fName) { //Without .TxT extention
         std::ifstream froamFile (fName + ".txt");
+        if (!froamFile) { std::cout << "404 File not found"; return; }
         std::string line;
-
+        lines.clear();
         while (std::getline(froamFile, line)) {
             lines.push_back(line);
         }
@@ -64,8 +66,8 @@ public:
     bool CanRedo() { return !redoStack.empty(); }
 
     Document Undo(Document& current) {
-        if (CanUndo) {
-            SaveState(current);
+        if (CanUndo()) {
+            redoStack.push(current.Clone());
             Document previous = undoStack.top();
             undoStack.pop();
             return previous;
@@ -75,8 +77,8 @@ public:
     }
 
     Document Redo(Document& current) {
-        if (CanRedo) {
-            SaveState(current);
+        if (CanRedo()) {
+            undoStack.push(current.Clone());
             Document next = redoStack.top();
             redoStack.pop();
             return next;
@@ -106,6 +108,10 @@ void ShowMenu() {
     std::cout << "0.Exit (you should kill yourself)" << std::endl;
 }
 
+void Ask(std::string choice) {
+    
+}
+
 int main () {
     Document doc;
 
@@ -113,19 +119,34 @@ int main () {
 
     int choice = 10;
 
+    int answer = 0;
+
     while (choice != 0) {
         ShowMenu();
         std::cin >> choice;
+        std::cin.ignore();
 
         switch (choice) {
         case 1:
+            std::cout << "Do you want to create new document? \n1.Yes \n2.No" << std::endl;
+            std::cin >> answer;
+            std::cin.ignore();
+            if (answer == 2) { break;}
+            else { continue; }
+
             doc = Document();
             std::cout << "New doc created" << std::endl;
             break;
 
         case 2: {
+            std::cout << "Do you want to Load from file? \n1.Yes \n2.No" << std::endl;
+            std::cin >> answer;
+            std::cin.ignore();
+            if (answer == 2) { break; }
+            else { continue; }
+
             std::string fname;
-            std::cout << "Enter file name to load from : ";
+            std::cout << "Enter file name to load from (Without .txt extention) : ";
             std::getline(std::cin, fname);
             doc.LoadFromFile(fname);
             break;
@@ -136,6 +157,12 @@ int main () {
             break;
 
         case 4: {
+            std::cout << "Do you want to add new line? \n1.Yes \n2.No" << std::endl;
+            std::cin >> answer;
+            std::cin.ignore();
+            if (answer == 2) { break; }
+            else { continue; }
+
               std::string newline;
               std::cout << "Enter new line : ";
               std::getline(std::cin, newline);
@@ -145,31 +172,50 @@ int main () {
         }
 
         case 5: {
+            std::cout << "Do you want to delete line? \n1.Yes \n2.No" << std::endl;
+            std::cin >> answer;
+            std::cin.ignore();
+            if (answer == 2) { break; }
+            else { continue; }
+
             int delline;
             std::cout << "Enter which line you want to delete : ";
             std::cin >> delline;
+            std::cin.ignore();
             cmdm.SaveState(doc);
             doc.DeleteLine(delline);
             break;
         }
 
         case 6: {
+            std::cout << "Do you want to save to file? \n1.Yes \n2.No" << std::endl;
+            std::cin >> answer;
+            std::cin.ignore();
+            if (answer == 2) { break; }
+            else { continue; }
+
             std::string fname;
-            std::cout << "Enter name of file to save :";
+            std::cout << "Enter name of file to save (Without .txt extention) :";
             std::getline(std::cin, fname);
             doc.SaveToFile(fname);
             break;
         }
 
-        /*case 7:
+        case 7:
             doc = cmdm.Undo(doc);
             break;
 
         case 8:
             doc = cmdm.Redo(doc);
-            break;*/
+            break;
 
         case 0: 
+            std::cout << "Do you want to exit? \n1.Yes \n2.No" << std::endl;
+            std::cin >> answer;
+            std::cin.ignore();
+            if (answer == 2) { break; }
+            else { continue; }
+
             std::exit(0);
             break;
 
